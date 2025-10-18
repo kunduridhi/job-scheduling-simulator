@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CPU Scheduling Simulator - Visualize and compare FCFS, SJF, SRTF, Priority, and Round Robin scheduling algorithms">
+    <meta name="keywords" content="CPU Scheduling, Operating Systems, FCFS, SJF, SRTF, Priority Scheduling, Round Robin, OS Simulator">
+    <meta name="author" content="Ridhi">
+    <title>CPU Scheduling Simulator - By Ridhi</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1e1b4b 0%, #581c87 50%, #1e1b4b 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .cpu-icon {
+            width: 40px;
+            height: 40px;
+            background: #a78bfa;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header p {
+            color: #e9d5ff;
+            font-size: 1.1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+            color: #e9d5ff;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        input::placeholder {
+            color: rgba(233, 213, 255, 0.5);
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #a78bfa;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: #7c3aed;
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: #6d28d9;
+        }
+
+        .btn-primary:disabled {
+            background: #4c1d95;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .btn-danger {
+            background: transparent;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+            padding: 6px 12px;
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-group .btn-primary {
+            flex: 1;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid rgba(168, 85, 247, 0.3);
+            font-weight: 600;
+            color: #e9d5ff;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(168, 85, 247, 0.1);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: rgba(168, 85, 247, 0.2);
+            border: 1px solid #a78bfa;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: #e9d5ff;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #e9d5ff;
+        }
+
+        .gantt-container {
+            overflow-x: auto;
+            padding-bottom: 20px;
+        }
+
+        .gantt-chart {
+            display: inline-flex;
+            min-width: 100%;
+        }
+
+        .gantt-block {
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 60px;
+            color: white;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .timeline {
+            display: inline-flex;
+            min-width: 100%;
+            position: relative;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            margin-top: 4px;
+        }
+
+        .timeline-mark {
+            position: absolute;
+            top: -24px;
+            font-size: 0.85rem;
+            color: #e9d5ff;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .metric-card {
+            background: rgba(168, 85, 247, 0.2);
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .metric-card p:first-child {
+            font-size: 0.9rem;
+            color: #e9d5ff;
+            margin-bottom: 8px;
+        }
+
+        .metric-card p:last-child {
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .resource-link {
+            display: block;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            background: rgba(139, 92, 246, 0.15);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 8px;
+            color: #e9d5ff;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .resource-link:hover {
+            background: rgba(139, 92, 246, 0.25);
+            border-color: #a78bfa;
+            transform: translateY(-2px);
+        }
+
+        .resource-link h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .resource-link p {
+            font-size: 0.9rem;
+            color: #c4b5fd;
+            margin: 0;
+        }
+
+        .resource-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            background: rgba(168, 85, 247, 0.3);
+            border-radius: 4px;
+            font-size: 0.75rem;
+            margin-left: 8px;
+        }
+
+        .key-concepts {
+            background: rgba(45, 27, 78, 0.5);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 16px;
+        }
+
+        .key-concepts h3 {
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            color: #fff;
+        }
+
+        .key-concepts ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .key-concepts li {
+            padding: 8px 0;
+            color: #e9d5ff;
+            font-size: 0.95rem;
+        }
+
+        .key-concepts li:before {
+            content: "→ ";
+            color: #a78bfa;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        /* Video Modal */
+        .video-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .video-card {
+            position: relative;
+            width: 90%;
+            max-width: 800px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.95) 0%, rgba(219, 39, 119, 0.95) 100%);
+            border: 2px solid rgba(168, 85, 247, 0.5);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            animation: scaleIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .sparkles {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .sparkle {
+            position: absolute;
+            font-size: 24px;
+            animation: sparkleFloat 3s ease-in-out infinite;
+            opacity: 0;
+        }
+
+        .video-content {
+            position: relative;
+            padding: 32px;
+        }
+
+        .video-iframe-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            background: #000;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .video-iframe-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .video-text {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .video-title {
+            font-size: 2rem;
+            color: white;
+            margin-bottom: 12px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            animation: titlePulse 2s ease-in-out infinite;
+        }
+
+        .video-subtitle {
+            color: #fde68a;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .heart {
+            color: #ec4899;
+            display: inline-block;
+            animation: heartBeat 1.2s ease-in-out infinite;
+        }
+
+        .progress-container {
+            height: 6px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #fde68a 0%, #fbbf24 100%);
+            width: 0%;
+            animation: progressAnimation 5s linear forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.7); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes sparkleFloat {
+            0% { 
+                transform: translateY(-10px) rotate(0deg);
+                opacity: 0;
+            }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { 
+                transform: translateY(calc(100vh + 10px)) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes titlePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes heartBeat {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.3); }
+            50% { transform: scale(1); }
+        }
+
+        @keyframes progressAnimation {
+            from { width: 0%; }
+            to { width: 100%; }
+        }
+
+        @media (max-width: 968px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            .header h1 {
+                font-size: 2rem;
+            }
+            .video-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <span class="cpu-icon">⚡</span>
+                JOB Scheduling Simulator
+            </h1>
+            <p>Visualize and compare different CPU scheduling algorithms </p>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h2>Add Process</h2>
+                <form id="processForm">
+                    <div class="form-group">
+                        <label for="processName">Process Name</label>
+                        <input type="text" id="processName" placeholder="e.g., P1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="arrivalTime">Arrival Time</label>
+                        <input type="number" id="arrivalTime" min="0" value="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="burstTime">Burst Time</label>
+                        <input type="number" id="burstTime" min="1" placeholder="5" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="priority">Priority (1=highest)</label>
+                        <input type="number" id="priority" min="1" value="1" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">➕ Add Process</button>
+                </form>
+
+                <div class="form-group" style="margin-top: 24px;">
+                    <label for="algorithm">Scheduling Algorithm</label>
+                    <select id="algorithm">
+                        <option value="fcfs">First Come First Serve (FCFS)</option>
+                        <option value="sjf">Shortest Job First (SJF)</option>
+                        <option value="srtf">Shortest Remaining Time First (SRTF)</option>
+                        <option value="priority">Priority Scheduling</option>
+                        <option value="rr">Round Robin (RR)</option>
+                    </select>
+                </div>
+
+                <div class="form-group hidden" id="quantumGroup">
+                    <label for="timeQuantum">Time Quantum</label>
+                    <input type="number" id="timeQuantum" min="1" value="2">
+                </div>
+
+                <div class="btn-group">
+                    <button id="simulateBtn" class="btn btn-primary" disabled>▶️ Simulate</button>
+                    <button id="clearBtn" class="btn btn-danger">🗑️ Clear</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Process Queue</h2>
+                <div id="processQueue"></div>
+            </div>
+        </div>
+
+        <div id="ganttSection" class="card hidden">
+            <h2>Gantt Chart</h2>
+            <div class="gantt-container" id="ganttChart"></div>
+        </div>
+
+        <div id="metricsSection" class="card hidden">
+            <h2>Process Metrics</h2>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Process</th>
+                            <th>Arrival</th>
+                            <th>Burst</th>
+                            <th>Completion</th>
+                            <th>Turnaround</th>
+                            <th>Waiting</th>
+                            <th>Response</th>
+                        </tr>
+                    </thead>
+                    <tbody id="metricsBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="avgMetricsSection" class="card hidden">
+            <h2>Average Metrics</h2>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <p>Average Waiting Time</p>
+                    <p id="avgWaiting">0.00 ms</p>
+                </div>
+                <div class="metric-card">
+                    <p>Average Turnaround Time</p>
+                    <p id="avgTurnaround">0.00 ms</p>
+                </div>
+                <div class="metric-card">
+                    <p>Average Response Time</p>
+                    <p id="avgResponse">0.00 ms</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="resourcesSection" class="card hidden">
+            <h2>📚 Learn More About <span id="algorithmName">CPU Scheduling</span></h2>
+            <div id="resourcesContent"></div>
+            <div class="key-concepts" id="keyConcepts"></div>
+        </div>
+    </div>
+
+    <!-- Video Modal -->
+    <div id="videoModal" class="video-modal hidden">
+        <div class="video-card">
+            <div class="sparkles" id="sparklesContainer"></div>
+            <div class="video-content">
+                <div class="video-iframe-container">
+                    <iframe
+                        id="celebrationVideo"
+                        src=""
+                        allow="autoplay; encrypted-media"
+                        allowfullscreen
+                    ></iframe>
+                </div>
+                <div class="video-text">
+                    <div class="video-title">🎉 Here's the Result... Enjoy! 🎉</div>
+                    <div class="video-subtitle">
+                        Made with <span class="heart">❤️</span> by Ridhi
+                    </div>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let processes = [
+            { id: 1, name: "P1", arrivalTime: 0, burstTime: 5, priority: 2 },
+            { id: 2, name: "P2", arrivalTime: 1, burstTime: 3, priority: 1 },
+            { id: 3, name: "P3", arrivalTime: 2, burstTime: 8, priority: 3 },
+            { id: 4, name: "P4", arrivalTime: 3, burstTime: 6, priority: 2 }
+        ];
+        let nextId = 5;
+        let currentResult = null;
+
+        const colors = ["#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#3b82f6", "#ef4444", "#06b6d4", "#84cc16", "#f97316", "#6366f1"];
+
+        function getColor(id) {
+            return colors[id % colors.length];
+        }
+
+        // Educational resources
+        const educationalResources = {
+            fcfs: {
+                name: "First Come First Serve (FCFS)",
+                resources: [
+                    { title: "Operating System Concepts by Silberschatz", description: "The definitive textbook on OS concepts - Chapter 5 covers CPU scheduling", url: "https://www.os-book.com/", type: "Book" },
+                    { title: "GeeksforGeeks - FCFS Scheduling", description: "Comprehensive tutorial with step-by-step examples and code", url: "https://www.geeksforgeeks.org/program-for-fcfs-cpu-scheduling-set-1/", type: "Tutorial" },
+                    { title: "Tutorialspoint - FCFS Algorithm", description: "Easy-to-understand explanation with diagrams and examples", url: "https://www.tutorialspoint.com/operating_system/os_process_scheduling_algorithms.htm", type: "Tutorial" },
+                    { title: "MIT OpenCourseWare - Scheduling", description: "Lecture notes from MIT's Operating Systems course", url: "https://ocw.mit.edu/", type: "Video Course" },
+                    { title: "Neso Academy - CPU Scheduling", description: "Popular YouTube series on OS concepts with excellent visualizations", url: "https://www.youtube.com/watch?v=EWkQl0n0w5M", type: "Video" },
+                    { title: "Studytonight - FCFS Explained", description: "Interactive tutorial with practice problems", url: "https://www.studytonight.com/operating-system/fcfs-scheduling", type: "Tutorial" }
+                ],
+                concepts: [
+                    "Processes executed in arrival order (First In, First Out)",
+                    "Non-preemptive algorithm - once started, runs to completion",
+                    "Can cause convoy effect (small processes wait for large ones)",
+                    "Simple to implement using FIFO queue",
+                    "Poor average waiting time and response time",
+                    "No starvation - every process will eventually execute"
+                ]
+            },
+            sjf: {
+                name: "Shortest Job First (SJF)",
+                resources: [
+                    { title: "Operating System Concepts - SJF Chapter", description: "Abraham Silberschatz's comprehensive coverage of SJF", url: "https://www.os-book.com/", type: "Book" },
+                    { title: "GeeksforGeeks - SJF Scheduling", description: "Detailed explanation with code examples in multiple languages", url: "https://www.geeksforgeeks.org/program-for-shortest-job-first-or-sjf-cpu-scheduling-set-1-non-preemptive/", type: "Tutorial" },
+                    { title: "Jenny's Lectures - SJF Video Tutorial", description: "One of the most popular OS tutorial channels on YouTube", url: "https://www.youtube.com/c/JennyslecturesCSIT", type: "Video" },
+                    { title: "Javatpoint - SJF Algorithm", description: "Clear explanations with advantages and disadvantages", url: "https://www.javatpoint.com/os-sjf-scheduling", type: "Tutorial" },
+                    { title: "Gate Smashers - CPU Scheduling Series", description: "Excellent visualization and competitive exam focused content", url: "https://www.youtube.com/c/GateSmashers", type: "Video Course" },
+                    { title: "Programiz - SJF Implementation", description: "Code examples with interactive visualizations", url: "https://www.programiz.com/dsa/cpu-scheduling", type: "Tutorial" }
+                ],
+                concepts: [
+                    "Selects process with shortest burst time first",
+                    "Optimal algorithm - minimizes average waiting time",
+                    "Can cause starvation for longer processes",
+                    "Requires knowledge of future CPU burst times",
+                    "Non-preemptive in standard form",
+                    "Difficult to implement in practice (prediction needed)"
+                ]
+            },
+            srtf: {
+                name: "Shortest Remaining Time First (SRTF)",
+                resources: [
+                    { title: "GeeksforGeeks - SRTF Algorithm", description: "Complete guide to preemptive SJF scheduling", url: "https://www.geeksforgeeks.org/shortest-remaining-time-first-preemptive-sjf-scheduling-algorithm/", type: "Tutorial" },
+                    { title: "Neso Academy - Preemptive Scheduling", description: "Video explanation with Gantt chart examples", url: "https://www.youtube.com/c/nesoacademy", type: "Video" },
+                    { title: "Tutorialspoint - SRTF Scheduling", description: "Step-by-step walkthrough with numerical examples", url: "https://www.tutorialspoint.com/operating_system/os_process_scheduling_algorithms.htm", type: "Tutorial" },
+                    { title: "Stanford CS140 - Scheduling Lectures", description: "University-level course materials on scheduling algorithms", url: "https://web.stanford.edu/class/cs140/", type: "Course" },
+                    { title: "Knowledge Gate - SRTF Examples", description: "Practice problems and exam-focused content", url: "https://www.youtube.com/c/KnowledgeGate", type: "Video" },
+                    { title: "JavaTpoint - SRTF with Code", description: "Implementation guide with working code examples", url: "https://www.javatpoint.com/os-srtf-scheduling", type: "Tutorial" }
+                ],
+                concepts: [
+                    "Preemptive version of SJF scheduling",
+                    "Can interrupt currently running process",
+                    "Optimal for minimum average waiting time",
+                    "Higher context switching overhead",
+                    "May cause starvation for longer processes",
+                    "Requires continuous monitoring of ready queue"
+                ]
+            },
+            priority: {
+                name: "Priority Scheduling",
+                resources: [
+                    { title: "Operating Systems: Three Easy Pieces", description: "Free, acclaimed OS textbook with detailed scheduling coverage", url: "https://pages.cs.wisc.edu/~remzi/OSTEP/", type: "Book" },
+                    { title: "GeeksforGeeks - Priority Scheduling", description: "Comprehensive guide with preemptive and non-preemptive examples", url: "https://www.geeksforgeeks.org/program-for-priority-cpu-scheduling-set-1/", type: "Tutorial" },
+                    { title: "Gate Lectures by Ravindrababu Ravula", description: "Highly rated professor's lectures on OS concepts", url: "https://www.youtube.com/watch?v=bURkTlS_hIk", type: "Video Course" },
+                    { title: "Studytonight - Priority Algorithm", description: "Interactive examples with aging solution", url: "https://www.studytonight.com/operating-system/priority-scheduling", type: "Tutorial" },
+                    { title: "Udacity - Intro to Operating Systems", description: "Free course covering scheduling algorithms in depth", url: "https://www.udacity.com/course/introduction-to-operating-systems--ud923", type: "Course" },
+                    { title: "Tutorialspoint - Priority Based Scheduling", description: "Clear explanation with real-world examples", url: "https://www.tutorialspoint.com/operating_system/os_process_scheduling_algorithms.htm", type: "Tutorial" }
+                ],
+                concepts: [
+                    "Each process assigned a priority number",
+                    "Lower priority number = higher priority (typically)",
+                    "Can be preemptive or non-preemptive",
+                    "Starvation problem for low-priority processes",
+                    "Aging technique prevents starvation",
+                    "Used in real-time operating systems"
+                ]
+            },
+            rr: {
+                name: "Round Robin (RR)",
+                resources: [
+                    { title: "Operating System Concepts - Round Robin", description: "Silberschatz's detailed coverage of RR scheduling", url: "https://www.os-book.com/", type: "Book" },
+                    { title: "GeeksforGeeks - Round Robin Scheduling", description: "Complete tutorial with time quantum selection guide", url: "https://www.geeksforgeeks.org/program-for-round-robin-scheduling-for-the-same-arrival-time/", type: "Tutorial" },
+                    { title: "MIT 6.828 Operating Systems", description: "MIT's legendary OS course materials", url: "https://pdos.csail.mit.edu/6.828/", type: "Course" },
+                    { title: "Neso Academy - Round Robin Algorithm", description: "Most watched RR scheduling tutorial on YouTube", url: "https://www.youtube.com/watch?v=aWlQYllBZDs", type: "Video" },
+                    { title: "JavaTpoint - RR Implementation", description: "Code examples in C, Java, and Python", url: "https://www.javatpoint.com/os-round-robin-scheduling-algorithm", type: "Tutorial" },
+                    { title: "Coursera - Operating Systems Specialization", description: "Professional course by top universities", url: "https://www.coursera.org/specializations/computer-fundamentals", type: "Course" },
+                    { title: "Guru99 - Round Robin Tutorial", description: "Beginner-friendly guide with practice questions", url: "https://www.guru99.com/round-robin-scheduling-example.html", type: "Tutorial" },
+                    { title: "Linux Kernel Development by Robert Love", description: "How RR is implemented in real Linux systems", url: "https://www.oreilly.com/library/view/linux-kernel-development/9780768696974/", type: "Book" }
+                ],
+                concepts: [
+                    "Time-sharing algorithm with fixed time quantum",
+                    "Processes executed in circular queue fashion",
+                    "Fair CPU allocation for all processes",
+                    "No starvation - every process gets CPU time",
+                    "Performance depends on time quantum selection",
+                    "Ideal for time-sharing systems (like UNIX/Linux)",
+                    "Higher average turnaround time than SJF",
+                    "Context switching overhead with small quantum"
+                ]
+            }
+        };
+
+        // DOM elements
+        const processForm = document.getElementById('processForm');
+        const algorithmSelect = document.getElementById('algorithm');
+        const quantumGroup = document.getElementById('quantumGroup');
+        const simulateBtn = document.getElementById('simulateBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const processQueue = document.getElementById('processQueue');
+        const videoModal = document.getElementById('videoModal');
+
+        // Event listeners
+        processForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const process = {
+                id: nextId++,
+                name: document.getElementById('processName').value,
+                arrivalTime: parseInt(document.getElementById('arrivalTime').value),
+                burstTime: parseInt(document.getElementById('burstTime').value),
+                priority: parseInt(document.getElementById('priority').value)
+            };
+            processes.push(process);
+            processForm.reset();
+            document.getElementById('arrivalTime').value = '0';
+            document.getElementById('priority').value = '1';
+            renderProcessQueue();
+            updateSimulateButton();
+        });
+
+        algorithmSelect.addEventListener('change', function() {
+            quantumGroup.classList.toggle('hidden', algorithmSelect.value !== 'rr');
+        });
+
+        simulateBtn.addEventListener('click', function() {
+            const algorithm = algorithmSelect.value;
+            const quantum = parseInt(document.getElementById('timeQuantum').value) || 2;
+
+            switch(algorithm) {
+                case 'fcfs': currentResult = scheduleFCFS(processes); break;
+                case 'sjf': currentResult = scheduleSJF(processes); break;
+                case 'srtf': currentResult = scheduleSRTF(processes); break;
+                case 'priority': currentResult = schedulePriority(processes); break;
+                case 'rr': currentResult = scheduleRoundRobin(processes, quantum); break;
+            }
+
+            showVideoModal();
+        });
+
+        clearBtn.addEventListener('click', function() {
+            processes = [];
+            currentResult = null;
+            renderProcessQueue();
+            updateSimulateButton();
+            hideResults();
+        });
+
+        function updateSimulateButton() {
+            simulateBtn.disabled = processes.length === 0;
+        }
+
+        function renderProcessQueue() {
+            if (processes.length === 0) {
+                processQueue.innerHTML = '<div class="empty-state"><p>No processes added yet.</p></div>';
+                return;
+            }
+
+            processQueue.innerHTML = `
+                <table>
+                    <thead>
+                        <tr><th>Process</th><th>Arrival</th><th>Burst</th><th>Priority</th><th>Action</th></tr>
+                    </thead>
+                    <tbody>
+                        ${processes.map(p => `
+                            <tr>
+                                <td><span class="badge">${p.name}</span></td>
+                                <td>${p.arrivalTime}</td>
+                                <td>${p.burstTime}</td>
+                                <td>${p.priority}</td>
+                                <td><button class="btn btn-danger" onclick="deleteProcess(${p.id})">🗑️</button></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function deleteProcess(id) {
+            processes = processes.filter(p => p.id !== id);
+            renderProcessQueue();
+            updateSimulateButton();
+        }
+
+        function showVideoModal() {
+            videoModal.classList.remove('hidden');
+            
+            // Create sparkles
+            const container = document.getElementById('sparklesContainer');
+            container.innerHTML = '';
+            for(let i = 0; i < 30; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                sparkle.textContent = '✨';
+                sparkle.style.left = Math.random() * 100 + '%';
+                sparkle.style.animationDelay = Math.random() * 2 + 's';
+                sparkle.style.animationDuration = (2 + Math.random() * 2) + 's';
+                container.appendChild(sparkle);
+            }
+
+            // Load video
+            document.getElementById('celebrationVideo').src = 
+                'https://www.youtube.com/embed/oyFQVZ2h0V8?autoplay=1&mute=1&controls=0&modestbranding=1&start=2';
+
+            // Reset progress
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.animation = 'none';
+            setTimeout(() => {
+                progressBar.style.animation = 'progressAnimation 5s linear forwards';
+            }, 10);
+
+            setTimeout(function() {
+                videoModal.classList.add('hidden');
+                document.getElementById('celebrationVideo').src = '';
+                showResults();
+            }, 5000);
+        }
+
+        function showResults() {
+            if (!currentResult) return;
+
+            renderGanttChart(currentResult.schedule);
+            renderMetrics(currentResult.metrics);
+            renderEducationalResources();
+
+            document.getElementById('ganttSection').classList.remove('hidden');
+            document.getElementById('metricsSection').classList.remove('hidden');
+            document.getElementById('avgMetricsSection').classList.remove('hidden');
+            document.getElementById('resourcesSection').classList.remove('hidden');
+        }
+
+        function hideResults() {
+            document.getElementById('ganttSection').classList.add('hidden');
+            document.getElementById('metricsSection').classList.add('hidden');
+            document.getElementById('avgMetricsSection').classList.add('hidden');
+            document.getElementById('resourcesSection').classList.add('hidden');
+        }
+
+        function renderGanttChart(schedule) {
+            const scale = 40;
+            let html = '<div class="gantt-chart">';
+            
+            schedule.forEach(s => {
+                const width = (s.endTime - s.startTime) * scale;
+                html += `<div class="gantt-block" style="width:${width}px;background-color:${s.color}">${s.processName}</div>`;
+            });
+            
+            html += '</div><div class="timeline" style="width:' + (schedule.reduce((sum, s) => sum + (s.endTime - s.startTime) * scale, 0)) + 'px">';
+            
+            let pos = 0;
+            schedule.forEach((s, i) => {
+                const width = (s.endTime - s.startTime) * scale;
+                if (i === 0) {
+                    html += `<span class="timeline-mark" style="left:0">${s.startTime}</span>`;
+                }
+                html += `<span class="timeline-mark" style="left:${pos + width}px">${s.endTime}</span>`;
+                pos += width;
+            });
+            
+            html += '</div>';
+            document.getElementById('ganttChart').innerHTML = html;
+        }
+
+        function renderMetrics(metrics) {
+            const tbody = document.getElementById('metricsBody');
+            tbody.innerHTML = metrics.map(m => `
+                <tr>
+                    <td>${m.processName}</td>
+                    <td>${m.arrivalTime}</td>
+                    <td>${m.burstTime}</td>
+                    <td>${m.completionTime}</td>
+                    <td>${m.turnaroundTime}</td>
+                    <td>${m.waitingTime}</td>
+                    <td>${m.responseTime}</td>
+                </tr>
+            `).join('');
+
+            const avgW = (metrics.reduce((s, m) => s + m.waitingTime, 0) / metrics.length).toFixed(2);
+            const avgT = (metrics.reduce((s, m) => s + m.turnaroundTime, 0) / metrics.length).toFixed(2);
+            const avgR = (metrics.reduce((s, m) => s + m.responseTime, 0) / metrics.length).toFixed(2);
+
+            document.getElementById('avgWaiting').textContent = avgW + ' ms';
+            document.getElementById('avgTurnaround').textContent = avgT + ' ms';
+            document.getElementById('avgResponse').textContent = avgR + ' ms';
+        }
+
+        function renderEducationalResources() {
+            const algo = algorithmSelect.value;
+            const data = educationalResources[algo];
+            
+            document.getElementById('algorithmName').textContent = data.name;
+            
+            let resourcesHTML = data.resources.map(r => `
+                <a href="${r.url}" target="_blank" class="resource-link">
+                    <h3>📖 ${r.title}<span class="resource-badge">${r.type}</span></h3>
+                    <p>${r.description}</p>
+                </a>
+            `).join('');
+            
+            document.getElementById('resourcesContent').innerHTML = resourcesHTML;
+            
+            let conceptsHTML = '<h3>🎯 Key Concepts</h3><ul>';
+            conceptsHTML += data.concepts.map(c => `<li>${c}</li>`).join('');
+            conceptsHTML += '</ul>';
+            
+            document.getElementById('keyConcepts').innerHTML = conceptsHTML;
+        }
+
+        // Scheduling Algorithms
+        function scheduleFCFS(processes) {
+            const sorted = [...processes].sort((a, b) => a.arrivalTime - b.arrivalTime);
+            const schedule = [];
+            const metrics = [];
+            let time = 0;
+
+            sorted.forEach(p => {
+                if (time < p.arrivalTime) time = p.arrivalTime;
+                const start = time;
+                const end = time + p.burstTime;
+
+                schedule.push({
+                    processId: p.id,
+                    processName: p.name,
+                    startTime: start,
+                    endTime: end,
+                    color: getColor(p.id)
+                });
+
+                metrics.push({
+                    processName: p.name,
+                    arrivalTime: p.arrivalTime,
+                    burstTime: p.burstTime,
+                    completionTime: end,
+                    turnaroundTime: end - p.arrivalTime,
+                    waitingTime: start - p.arrivalTime,
+                    responseTime: start - p.arrivalTime
+                });
+
+                time = end;
+            });
+
+            return { schedule, metrics };
+        }
+
+        function scheduleSJF(processes) {
+            const remaining = [...processes];
+            const schedule = [];
+            const metrics = [];
+            let time = 0;
+
+            while (remaining.length > 0) {
+                const available = remaining.filter(p => p.arrivalTime <= time);
+                
+                if (available.length === 0) {
+                    time = Math.min(...remaining.map(p => p.arrivalTime));
+                    continue;
+                }
+
+                const selected = available.reduce((min, p) => p.burstTime < min.burstTime ? p : min);
+                const start = time;
+                const end = time + selected.burstTime;
+
+                schedule.push({
+                    processId: selected.id,
+                    processName: selected.name,
+                    startTime: start,
+                    endTime: end,
+                    color: getColor(selected.id)
+                });
+
+                metrics.push({
+                    processName: selected.name,
+                    arrivalTime: selected.arrivalTime,
+                    burstTime: selected.burstTime,
+                    completionTime: end,
+                    turnaroundTime: end - selected.arrivalTime,
+                    waitingTime: start - selected.arrivalTime,
+                    responseTime: start - selected.arrivalTime
+                });
+
+                time = end;
+                remaining.splice(remaining.indexOf(selected), 1);
+            }
+
+            return { schedule, metrics };
+        }
+
+        function scheduleSRTF(processes) {
+            const pList = processes.map(p => ({ ...p, remaining: p.burstTime, firstResponse: -1 }));
+            const schedule = [];
+            const metrics = [];
+            let time = 0;
+            const maxTime = Math.max(...processes.map(p => p.arrivalTime + p.burstTime)) * 2;
+            let lastPid = null;
+            let segStart = 0;
+
+            while (time < maxTime) {
+                const available = pList.filter(p => p.arrivalTime <= time && p.remaining > 0);
+                
+                if (available.length === 0) {
+                    time++;
+                    continue;
+                }
+
+                const selected = available.reduce((min, p) => p.remaining < min.remaining ? p : min);
+                
+                if (selected.firstResponse === -1) selected.firstResponse = time;
+
+                if (lastPid !== selected.id && lastPid !== null) {
+                    const lastP = pList.find(p => p.id === lastPid);
+                    schedule.push({
+                        processId: lastPid,
+                        processName: lastP.name,
+                        startTime: segStart,
+                        endTime: time,
+                        color: getColor(lastPid)
+                    });
+                    segStart = time;
+                } else if (lastPid === null) {
+                    segStart = time;
+                }
+
+                selected.remaining--;
+                time++;
+                lastPid = selected.id;
+
+                if (selected.remaining === 0) {
+                    schedule.push({
+                        processId: selected.id,
+                        processName: selected.name,
+                        startTime: segStart,
+                        endTime: time,
+                        color: getColor(selected.id)
+                    });
+
+                    const orig = processes.find(p => p.id === selected.id);
+                    metrics.push({
+                        processName: selected.name,
+                        arrivalTime: selected.arrivalTime,
+                        burstTime: orig.burstTime,
+                        completionTime: time,
+                        turnaroundTime: time - selected.arrivalTime,
+                        waitingTime: time - selected.arrivalTime - orig.burstTime,
+                        responseTime: selected.firstResponse - selected.arrivalTime
+                    });
+
+                    lastPid = null;
+                }
+
+                if (pList.every(p => p.remaining === 0)) break;
+            }
+
+            return { schedule, metrics };
+        }
+
+        function schedulePriority(processes) {
+            const remaining = [...processes];
+            const schedule = [];
+            const metrics = [];
+            let time = 0;
+
+            while (remaining.length > 0) {
+                const available = remaining.filter(p => p.arrivalTime <= time);
+                
+                if (available.length === 0) {
+                    time = Math.min(...remaining.map(p => p.arrivalTime));
+                    continue;
+                }
+
+                const selected = available.reduce((min, p) => p.priority < min.priority ? p : min);
+                const start = time;
+                const end = time + selected.burstTime;
+
+                schedule.push({
+                    processId: selected.id,
+                    processName: selected.name,
+                    startTime: start,
+                    endTime: end,
+                    color: getColor(selected.id)
+                });
+
+                metrics.push({
+                    processName: selected.name,
+                    arrivalTime: selected.arrivalTime,
+                    burstTime: selected.burstTime,
+                    completionTime: end,
+                    turnaroundTime: end - selected.arrivalTime,
+                    waitingTime: start - selected.arrivalTime,
+                    responseTime: start - selected.arrivalTime
+                });
+
+                time = end;
+                remaining.splice(remaining.indexOf(selected), 1);
+            }
+
+            return { schedule, metrics };
+        }
+
+        function scheduleRoundRobin(processes, quantum) {
+            const pList = processes.map(p => ({ ...p, remaining: p.burstTime, firstResponse: -1 }));
+            const schedule = [];
+            const metrics = [];
+            const queue = [];
+            const arrived = new Set();
+            let time = 0;
+            const maxTime = processes.reduce((s, p) => s + p.burstTime, 0) + Math.max(...processes.map(p => p.arrivalTime));
+
+            pList.forEach(p => {
+                if (p.arrivalTime === 0) {
+                    queue.push(p);
+                    arrived.add(p.id);
+                }
+            });
+
+            while (queue.length > 0 || pList.some(p => p.remaining > 0)) {
+                if (queue.length === 0) {
+                    const next = pList.filter(p => p.remaining > 0 && !arrived.has(p.id))
+                        .reduce((min, p) => p.arrivalTime < min ? p.arrivalTime : min, Infinity);
+                    
+                    if (next === Infinity) break;
+                    
+                    time = next;
+                    pList.forEach(p => {
+                        if (p.arrivalTime === time && !arrived.has(p.id)) {
+                            queue.push(p);
+                            arrived.add(p.id);
+                        }
+                    });
+                    continue;
+                }
+
+                const current = queue.shift();
+                
+                if (current.firstResponse === -1) current.firstResponse = time;
+
+                const execTime = Math.min(quantum, current.remaining);
+                const start = time;
+                const end = time + execTime;
+
+                schedule.push({
+                    processId: current.id,
+                    processName: current.name,
+                    startTime: start,
+                    endTime: end,
+                    color: getColor(current.id)
+                });
+
+                current.remaining -= execTime;
+                time = end;
+
+                pList.forEach(p => {
+                    if (p.arrivalTime <= time && p.remaining > 0 && !arrived.has(p.id) && p.id !== current.id) {
+                        queue.push(p);
+                        arrived.add(p.id);
+                    }
+                });
+
+                if (current.remaining > 0) {
+                    queue.push(current);
+                } else {
+                    const orig = processes.find(p => p.id === current.id);
+                    metrics.push({
+                        processName: current.name,
+                        arrivalTime: current.arrivalTime,
+                        burstTime: orig.burstTime,
+                        completionTime: time,
+                        turnaroundTime: time - current.arrivalTime,
+                        waitingTime: time - current.arrivalTime - orig.burstTime,
+                        responseTime: current.firstResponse - current.arrivalTime
+                    });
+                }
+
+                if (time > maxTime) break;
+            }
+
+            return { schedule, metrics };
+        }
+
+        // Initialize
+        renderProcessQueue();
+        updateSimulateButton();
+    </script>
+</body>
+</html>
